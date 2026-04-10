@@ -1,107 +1,69 @@
-A Simple Python Project Skeleton
-================================
+aboutcode.federated
+===================
 
-This repo attempts to standardize the structure of the Python-based project's
-repositories using modern Python packaging and configuration techniques.
-Using this `blog post`_ as inspiration, this repository serves as the base for
-all new Python projects and is mergeable in existing repositories as well.
-
-.. _blog post: https://blog.jaraco.com/a-project-skeleton-for-python-projects/
+This is a library of utilities to compute ids and file paths for AboutCode
+federated data based on Package URL
 
 
-Usage
-=====
-
-A brand new project
--------------------
-
-.. code-block:: bash
-
-    git init my-new-repo
-    cd my-new-repo
-    git pull git@github.com:nexB/skeleton
-
-    # Create the new repo on GitHub, then update your remote
-    git remote set-url origin git@github.com:nexB/your-new-repo.git
-
-From here, you can make the appropriate changes to the files for your specific project.
-
-Update an existing project
----------------------------
-
-.. code-block:: bash
-
-    cd my-existing-project
-    git remote add skeleton git@github.com:nexB/skeleton
-    git fetch skeleton
-    git merge skeleton/main --allow-unrelated-histories
-
-This is also the workflow to use when updating the skeleton files in any given repository.
-
-More usage instructions can be found in ``docs/skeleton-usage.rst``.
+Federated data utilities goal is to handle content-defined and hash-addressable
+Package data keyed by PURL stored in many Git repositories. This approach to
+federate decentralized data is called FederatedCode.
 
 
-Release Notes
-=============
+Overview
+========
 
-- 2025-03-31:
+The main design elements for these utilities are:
 
-    - Use ruff as the main code formatting tool, add ruff rules to pyproject.toml
+1. **Data Federation**: A Data Federation is a database, representing a consistent,
+non-overlapping set of data kind clusters (like scans, vulnerabilities or SBOMs)
+across many package ecosystems, aka. PURL types.
+A Federation is similar to a traditional database.
 
-- 2025-03-29:
+2. **Data Cluster**: A Data Federation contains Data Clusters, where a Data Cluster
+purpose is to store the data of a single kind (like scans) across multiple PURL
+types. The cluster name is the data kind name and is used as the prefix for
+repository names. A Data Cluster is akin to a table in a traditional database.
 
-    - Add support for beta macOS-15
-    - Add support for beta windows-2025
+3. **Data Repository**: A DataCluster contains of one or more Git Data Repository,
+each storing datafiles of the cluster data kind and a one PURL type, spreading
+the datafiles in multiple Data Directories. The name is data-kind +PURL-
+type+hashid. A Repository is similar to a shard or tablespace in a traditionale
+database.
 
-- 2025-02-14:
+4. **Data Directory**: In a Repository, a Data Directory contains the datafiles for
+PURLs. The directory name PURL-type+hashid
 
-    - Drop support for Python 3.8, add support in CI for Python 3.13, use Python 3.12 as default
-      version.
+5. **Data File**: This is a Data File of the DataCluster's Data Kind that is
+stored in subdirectories structured after the PURL components::
 
-- 2025-01-17:
+   namespace/name/version/qualifiers/subpath:
 
-    - Drop support for macOS-12, add support for macOS-14
-    - Add support in CI for ubuntu-24.04
-    - Add support in CI for Python 3.12
+- Either at the level of a PURL name: namespace/name,
+- Or at the PURL version level namespace/name/version,
+- Or at the PURL qualifiers+PURL subpath level.
 
-- 2024-08-20:
+A Data File can be for instance a JSON scan results file, or a list of PURLs in
+YAML.
 
-    - Update references of ownership from nexB to aboutcode-org
+For example, a list of PURLs as a Data Kind  would stored at the name
+subdirectory level::
 
-- 2024-07-01:
+    gem-0107/gem/random_password_generator/purls.yml
 
-    - Drop support for Python 3.8
-    - Drop support for macOS-11, add support for macOS-14
+Or a ScanCode scan as a Data Kind at the version subdirectory level::
 
-- 2024-02-19:
+    gem-0107/npm/file/3.24.3/scancode.yml
 
-    - Replace support in CI of default ubuntu-20.04 by ubuntu-22.04
 
-- 2023-10-18:
 
-    - Add dark mode support in documentation
+License
+-------
 
-- 2023-07-18:
+Copyright (c) AboutCode and others. All rights reserved.
 
-    - Add macOS-13 job in azure-pipelines.yml
+SPDX-License-Identifier: Apache-2.0
 
-- 2022-03-04:
+See https://github.com/aboutcode-org/vulnerablecode for support or download.
 
-    - Synchronize configure and configure.bat scripts for sanity
-    - Update CI operating system support with latest Azure OS images
-    - Streamline utility scripts in etc/scripts/ to create, fetch and manage third-party
-      dependencies. There are now fewer scripts. See etc/scripts/README.rst for details
-
-- 2021-09-03:
-    - ``configure`` now requires pinned dependencies via the use of ``requirements.txt``
-      and ``requirements-dev.txt``
-    - ``configure`` can now accept multiple options at once
-    - Add utility scripts from scancode-toolkit/etc/release/ for use in generating project files
-    - Rename virtual environment directory from ``tmp`` to ``venv``
-    - Update README.rst with instructions for generating ``requirements.txt``
-      and ``requirements-dev.txt``, as well as collecting dependencies as wheels and generating
-      ABOUT files for them.
-
-- 2021-05-11:
-    - Adopt new configure scripts from ScanCode TK that allows correct configuration of which
-      Python version is used.
+See https://aboutcode.org for more information about AboutCode OSS projects.

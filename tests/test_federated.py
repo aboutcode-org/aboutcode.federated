@@ -82,7 +82,7 @@ def test_DataFederation_load(tmp_path):
 def test_DataFederation_from_url(monkeypatch):
     class Response:
         ok = True
-        text = "name: fed\n" "remote_root_url: https://github.com/org\n"
+        text = "name: fed\nremote_root_url: https://github.com/org\n"
 
     monkeypatch.setattr(requests, "get", lambda url, headers: Response())
     fed = DataFederation.from_url(name="fed", remote_root_url="https://github.com/org")

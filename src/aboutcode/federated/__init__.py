@@ -586,7 +586,7 @@ class DataFederation:
 
         if data["name"] != name:
             raise TypeError(
-                f"Inconsistent federation name {name!r} " f"with YAML config text: {text!r}"
+                f"Inconsistent federation name {name!r} with YAML config text: {text!r}"
             )
 
         lrd = local_root_dir and Path(local_root_dir) or None
@@ -930,7 +930,7 @@ class PurlTypeConfig:
             )
 
         if not is_valid_power_of_two(self.number_of_dirs):
-            raise TypeError(f"number_of_dirs must be a power of 2, " f"not {self.number_of_dirs!r}")
+            raise TypeError(f"number_of_dirs must be a power of 2, not {self.number_of_dirs!r}")
 
         if not self.number_of_repos or self.number_of_repos > self.number_of_dirs:
             raise TypeError(
@@ -939,9 +939,7 @@ class PurlTypeConfig:
             )
 
         if not is_valid_power_of_two(self.number_of_repos):
-            raise TypeError(
-                f"number_of_repos must be a power of 2, " f"not {self.number_of_repos!r}"
-            )
+            raise TypeError(f"number_of_repos must be a power of 2, not {self.number_of_repos!r}")
 
     @property
     def numbers_of_dirs_per_repo(self) -> int:
