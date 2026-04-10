@@ -1,8 +1,9 @@
 Changelog
-=========
+=============
 
 
-v0.0.0
-------
+v0.1.0 (October 20, 2025)
+---------------------------
 
-*xxxx-xx-xx* -- Initial release.
+- Initial release of the ``aboutcode.federated`` library based on
+  original work in the ``aboutcode.hashid`` library.

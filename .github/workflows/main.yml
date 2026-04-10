@@ -1,15 +1,17 @@
-name: CI Documentation
+name: run tests
 
 on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.13]
+        python-version: ["3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout code
@@ -20,13 +22,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Dependencies
-        run:  ./configure --dev
+      - name: Install dependencies
+        run: make dev
 
-      - name: Check documentation and HTML for errors and dead links
-        run: make docs-check
+      - name: Validate code format
+        run: make check
 
-      - name: Check documentation for style errors
-        run: make doc8
-
-
+      - name: Run tests
+        run: make test
