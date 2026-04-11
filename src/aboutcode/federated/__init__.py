@@ -383,6 +383,7 @@ PACKAGE_REPOS_NAME_PREFIX = "aboutcode-packages"
 
 KIND_PURLS_FILENAME = "purls.yml"
 KIND_VULNERABILITIES_FILENAME = "vulnerabilities.yml"
+KIND_API_PACKAGE_METADATA_FILENAME = "api_package_metadata.yml"
 
 
 def get_package_purls_yml_file_path(purl: Union[PackageURL, str]):
@@ -397,6 +398,13 @@ def get_package_vulnerabilities_yml_file_path(purl: Union[PackageURL, str]):
     Return the path to a Package vulnerabilities.yml YAML for a purl.
     """
     return get_package_base_dir(purl) / KIND_VULNERABILITIES_FILENAME
+
+
+def get_api_package_metadata_file_path(purl: Union[PackageURL, str]):
+    """
+    Return the path to a Package api_package_metadata.yml YAML for a purl.
+    """
+    return get_package_base_dir(purl) / KIND_API_PACKAGE_METADATA_FILENAME
 
 
 def get_package_base_dir(purl: Union[PackageURL, str]):
@@ -586,7 +594,7 @@ class DataFederation:
 
         if data["name"] != name:
             raise TypeError(
-                f"Inconsistent federation name {name!r} with YAML config text: {text!r}"
+                f"Inconsistent federation name {name!r} " f"with YAML config text: {text!r}"
             )
 
         lrd = local_root_dir and Path(local_root_dir) or None
@@ -930,7 +938,7 @@ class PurlTypeConfig:
             )
 
         if not is_valid_power_of_two(self.number_of_dirs):
-            raise TypeError(f"number_of_dirs must be a power of 2, not {self.number_of_dirs!r}")
+            raise TypeError(f"number_of_dirs must be a power of 2, " f"not {self.number_of_dirs!r}")
 
         if not self.number_of_repos or self.number_of_repos > self.number_of_dirs:
             raise TypeError(
@@ -939,7 +947,9 @@ class PurlTypeConfig:
             )
 
         if not is_valid_power_of_two(self.number_of_repos):
-            raise TypeError(f"number_of_repos must be a power of 2, not {self.number_of_repos!r}")
+            raise TypeError(
+                f"number_of_repos must be a power of 2, " f"not {self.number_of_repos!r}"
+            )
 
     @property
     def numbers_of_dirs_per_repo(self) -> int:
