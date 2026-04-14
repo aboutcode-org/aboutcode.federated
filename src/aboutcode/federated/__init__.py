@@ -383,7 +383,8 @@ PACKAGE_REPOS_NAME_PREFIX = "aboutcode-packages"
 
 KIND_PURLS_FILENAME = "purls.yml"
 KIND_VULNERABILITIES_FILENAME = "vulnerabilities.yml"
-KIND_API_PACKAGE_METADATA_FILENAME = "api_package_metadata.yml"
+KIND_API_PACKAGE_METADATA_FILENAME = "api_package_metadata.json"
+KIND_API_VERSION_RESPONSE_FILENAME = "api_package_version_response.json"
 
 
 def get_package_purls_yml_file_path(purl: Union[PackageURL, str]):
@@ -405,6 +406,13 @@ def get_api_package_metadata_file_path(purl: Union[PackageURL, str]):
     Return the path to a Package api_package_metadata.yml YAML for a purl.
     """
     return get_package_base_dir(purl) / KIND_API_PACKAGE_METADATA_FILENAME
+
+
+def get_api_package_version_response_file_path(purl: Union[PackageURL, str]):
+    """
+    Return the path to a Package api_package_version_response.yml YAML for a purl.
+    """
+    return get_package_base_dir(purl) / KIND_API_VERSION_RESPONSE_FILENAME
 
 
 def get_package_base_dir(purl: Union[PackageURL, str]):
