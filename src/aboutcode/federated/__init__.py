@@ -403,14 +403,14 @@ def get_package_vulnerabilities_yml_file_path(purl: Union[PackageURL, str]):
 
 def get_api_package_metadata_file_path(purl: Union[PackageURL, str]):
     """
-    Return the path to a Package api_package_metadata.yml YAML for a purl.
+    Return the path to a Package api_package_metadata.json file for a purl.
     """
     return get_package_base_dir(purl) / KIND_API_PACKAGE_METADATA_FILENAME
 
 
 def get_api_package_version_response_file_path(purl: Union[PackageURL, str]):
     """
-    Return the path to a Package api_package_version_response.yml YAML for a purl.
+    Return the path to a Package api_package_version_response.json file for a purl.
     """
     return get_package_base_dir(purl) / KIND_API_VERSION_RESPONSE_FILENAME
 
@@ -488,12 +488,14 @@ class DataFederation:
         cls,
         remote_root_url: str,
         federation_name: str,
+        branch: str = "main",
     ):
         """Return a URL to directly download the federation config file"""
         return build_direct_federation_config_file_url(
             remote_root_url=remote_root_url,
             federation_name=federation_name,
             config_filename=cls.CONFIG_FILENAME,
+            branch=branch,
         )
 
     @property
@@ -856,7 +858,9 @@ class DataCluster:
             return self._configs_by_purl_type["default"]
         return self._configs_by_purl_type[purl_type]
 
-    def get_datafile_relative_path(self, purl: Union[str, PackageURL], datafile_name=None) -> str:
+    def get_datafile_relative_path(
+        self, purl: Union[str, PackageURL], datafile_name: str = None
+    ) -> str:
         """
         Return the datfile path relative to the root of a cluster directory
         given a PURL.
@@ -891,7 +895,9 @@ class DataCluster:
         return f"{repo_hash:04}", purl_hashid
 
     def get_datafile_repo_and_path(
-        self, purl: Union[str, PackageURL], datafile_name=None
+        self,
+        purl: Union[str, PackageURL],
+        datafile_name: str = None,
     ) -> Tuple[str, str]:
         """
         Return the repository name and relative path to the datafile of the data kind stored
@@ -1162,12 +1168,12 @@ def cluster_preset():
             data_license="CC-BY-4.0",
         ),
         DataCluster(
-            data_kind="api_package_version_responses",
+            data_kind="api_package_version_response",
             description="Raw API response datafiles for a package versions. "
             "Each datafile path and schema is PURL type-specific "
             "and not documented here.",
             # FIXME: a POM is in XML, some metadata files may be code
-            datafile_name="api_package_version_responses.json",
+            datafile_name="api_package_version_response.json",
             datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
@@ -1446,7 +1452,7 @@ def build_direct_federation_config_file_url(
     remote_root_url: str,
     federation_name: str,
     config_filename: str,
-    branch: str,
+    branch: str = "main",
 ):
     """
     Return the URL to download a remote config file for a federation
