@@ -2,6 +2,14 @@ Changelog
 =============
 
 
+v1.0.0 (May 12, 2026)
+---------------------------
+
+- Add new DataKind for ``api_package_metadata`` and
+  ``api_package_version_response``. Add field ``datafile_name``  to DataCluster
+  and modify ``datafile_path_template`` to use ``datafile_name`` instead of
+  specifying the file name in ``datafile_path_template``.
+
 v0.1.0 (October 20, 2025)
 ---------------------------
 
