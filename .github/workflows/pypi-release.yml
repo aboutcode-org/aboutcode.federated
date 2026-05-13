@@ -1,17 +1,6 @@
 name: Create library release archives, create a GH release and publish PyPI wheel and sdist on tag in main branch
 
 
-# This is executed automatically on a tag in the main branch
-
-# Summary of the steps:
-# - build wheels and sdist
-# - upload wheels and sdist to PyPI
-# - create gh-release and upload wheels and dists there
-# TODO: smoke test wheels and sdist
-# TODO: add changelog to release text body
-
-# WARNING: this is designed only for packages building as pure Python wheels
-
 on:
   workflow_dispatch:
   push:
@@ -90,4 +79,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
         with:
           verbose: true
-          password: ${{ secrets.PYPI_API_TOKEN_ABOUTCODE_FEDERATED }}
