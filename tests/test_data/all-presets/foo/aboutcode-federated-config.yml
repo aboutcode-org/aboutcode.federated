@@ -6,7 +6,8 @@ data_license:
 data_maintainers: []
 data_clusters:
   - data_kind: api_package_metadata
-    datafile_path_template:
+    datafile_name: api_package_metadata.json
+    datafile_path_template: '{/namespace}/{name}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -83,8 +84,9 @@ data_clusters:
     documentation_url:
     data_license: CC-BY-4.0
     data_maintainers: []
-  - data_kind: api_package_version_responses
-    datafile_path_template:
+  - data_kind: api_package_version_response
+    datafile_name: api_package_version_response.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -162,7 +164,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: atom_slices
-    datafile_path_template: '{/namespace}/{name}/{version}/atom.json'
+    datafile_name: atom.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -239,7 +242,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: atom_vulnerable_slices
-    datafile_path_template: '{/namespace}/{name}/{version}/atom-vulnerable.json'
+    datafile_name: atom-vulnerable.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -316,7 +320,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: cyclonedx14_sboms
-    datafile_path_template: '{/namespace}/{name}/{version}/cyclonedx-14.json'
+    datafile_name: cyclonedx-14.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -393,7 +398,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: cyclonedx15_sboms
-    datafile_path_template: '{/namespace}/{name}/{version}/cyclonedx-15.json'
+    datafile_name: cyclonedx-15.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -470,7 +476,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: cyclonedx16_sboms
-    datafile_path_template: '{/namespace}/{name}/{version}/cyclonedx-16.json'
+    datafile_name: cyclonedx-16.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -547,7 +554,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: openssf_security_scorecards
-    datafile_path_template: '{/namespace}/{name}/security_scorecard.json'
+    datafile_name: security_scorecard.json
+    datafile_path_template: '{/namespace}/{name}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 256
@@ -624,7 +632,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: purldb
-    datafile_path_template: '{/namespace}/{name}/{version}/purldb.json'
+    datafile_name: purldb.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -702,7 +711,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: purls
-    datafile_path_template: '{/namespace}/{name}/purls.yml'
+    datafile_name: purls.yml
+    datafile_path_template: '{/namespace}/{name}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 128
@@ -779,7 +789,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: scancode_fingerprints
-    datafile_path_template: '{/namespace}/{name}/{version}/scancode-fingerprints.json'
+    datafile_name: scancode-fingerprints.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -856,7 +867,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: scancode_toolkit_scans
-    datafile_path_template: '{/namespace}/{name}/{version}/scancode-toolkit.json'
+    datafile_name: scancode-toolkit.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -933,7 +945,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: security_advisories
-    datafile_path_template: '{/namespace}/{name}/{version}/advisories.yml'
+    datafile_name: advisories.yml
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: default
         number_of_repos: 1
@@ -944,7 +957,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: spdx2_sboms
-    datafile_path_template: '{/namespace}/{name}/{version}/spdx-2.json'
+    datafile_name: spdx-2.json
+    datafile_path_template: '{/namespace}/{name}/{version}/{datafile_name}'
     purl_type_configs:
       - purl_type: github
         number_of_repos: 1024
@@ -1021,7 +1035,8 @@ data_clusters:
     data_license: CC-BY-4.0
     data_maintainers: []
   - data_kind: vulnerabilities
-    datafile_path_template: '{/namespace}/{name}/vulnerabilities.json'
+    datafile_name: vulnerabilities.json
+    datafile_path_template: '{/namespace}/{name}/{datafile_name}'
     purl_type_configs:
       - purl_type: default
         number_of_repos: 1

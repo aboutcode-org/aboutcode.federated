@@ -383,6 +383,8 @@ PACKAGE_REPOS_NAME_PREFIX = "aboutcode-packages"
 
 KIND_PURLS_FILENAME = "purls.yml"
 KIND_VULNERABILITIES_FILENAME = "vulnerabilities.yml"
+KIND_API_PACKAGE_METADATA_FILENAME = "api_package_metadata.json"
+KIND_API_VERSION_RESPONSE_FILENAME = "api_package_version_response.json"
 
 
 def get_package_purls_yml_file_path(purl: Union[PackageURL, str]):
@@ -397,6 +399,20 @@ def get_package_vulnerabilities_yml_file_path(purl: Union[PackageURL, str]):
     Return the path to a Package vulnerabilities.yml YAML for a purl.
     """
     return get_package_base_dir(purl) / KIND_VULNERABILITIES_FILENAME
+
+
+def get_api_package_metadata_file_path(purl: Union[PackageURL, str]):
+    """
+    Return the path to a Package api_package_metadata.json file for a purl.
+    """
+    return get_package_base_dir(purl) / KIND_API_PACKAGE_METADATA_FILENAME
+
+
+def get_api_package_version_response_file_path(purl: Union[PackageURL, str]):
+    """
+    Return the path to a Package api_package_version_response.json file for a purl.
+    """
+    return get_package_base_dir(purl) / KIND_API_VERSION_RESPONSE_FILENAME
 
 
 def get_package_base_dir(purl: Union[PackageURL, str]):
@@ -472,12 +488,14 @@ class DataFederation:
         cls,
         remote_root_url: str,
         federation_name: str,
+        branch: str = "main",
     ):
         """Return a URL to directly download the federation config file"""
         return build_direct_federation_config_file_url(
             remote_root_url=remote_root_url,
             federation_name=federation_name,
             config_filename=cls.CONFIG_FILENAME,
+            branch=branch,
         )
 
     @property
@@ -550,6 +568,7 @@ class DataFederation:
         name: str,
         remote_root_url: str,
         local_root_dir: Path = None,
+        branch: str = "main",
     ) -> "DataFederation":
         """
         Return a DataFederation loaded from a remote configuration file.
@@ -558,6 +577,7 @@ class DataFederation:
             remote_root_url=remote_root_url,
             federation_name=name,
             config_filename=cls.CONFIG_FILENAME,
+            branch=branch,
         )
         headers = {"User-Agent": "AboutCode/FederatedCode"}
         response = requests.get(url=rcf_url, headers=headers)
@@ -699,6 +719,9 @@ class DataCluster:
     # this is the name of cluster
     data_kind: str
 
+    # The filename used when saving data.
+    datafile_name: str
+
     # a URI template to build the path to the datafile for this data kind.
     # this is the path relative to the root of a cluster directory. It does not
     # include directory and repository.
@@ -784,6 +807,7 @@ class DataCluster:
 
         return cls(
             data_kind=data["data_kind"],
+            datafile_name=data.get("datafile_name"),
             datafile_path_template=data.get("datafile_path_template"),
             purl_type_configs=ptcs,
             data_schema_url=data.get("data_schema_url"),
@@ -796,6 +820,7 @@ class DataCluster:
     def to_dict(self):
         return dict(
             data_kind=self.data_kind,
+            datafile_name=self.datafile_name,
             datafile_path_template=self.datafile_path_template,
             purl_type_configs=[pt.to_dict() for pt in self.purl_type_configs],
             data_schema_url=self.data_schema_url,
@@ -818,19 +843,6 @@ class DataCluster:
         """
         raise NotImplementedError()
 
-        purl = as_purl(purl)
-        # FIXME: create as member
-        purl_type_config_by_type = {ptc.purl_type: ptc for ptc in self.purl_type_configs}
-        purl_type_config = purl_type_config_by_type(purl.type, self.default_config())
-
-        ppe = package_path_elements(purl, max_value=purl_type_config.number_of_dirs)
-        purl_hash, core_path, version, extra_path = ppe
-
-        direct_url = None
-        # construct a path based on path template
-        # construct a URL
-        return direct_url
-
     def get_local_datafile(self, purl: Union[str, PackageURL]) -> LocalDataFile:
         """
         Return a LocalDataFile of the data kind stored in this cluster given a
@@ -846,7 +858,9 @@ class DataCluster:
             return self._configs_by_purl_type["default"]
         return self._configs_by_purl_type[purl_type]
 
-    def get_datafile_relative_path(self, purl: Union[str, PackageURL]) -> str:
+    def get_datafile_relative_path(
+        self, purl: Union[str, PackageURL], datafile_name: str = None
+    ) -> str:
         """
         Return the datfile path relative to the root of a cluster directory
         given a PURL.
@@ -858,11 +872,15 @@ class DataCluster:
                 f"DataCluster '{self.data_kind}' needs PackageURL with version to generate path."
             )
 
+        if not datafile_name:
+            datafile_name = self.datafile_name
+
         template = uritemplate.URITemplate(self.datafile_path_template)
         return template.expand(
             namespace=purl.namespace,
             name=purl.name,
             version=purl.version,
+            datafile_name=datafile_name,
         )
 
     def get_repo_and_dir_hash(self, purl: Union[str, PackageURL]) -> Tuple[str, str]:
@@ -876,14 +894,18 @@ class DataCluster:
         repo_hash = purl_hash - (purl_hash % ptc.numbers_of_dirs_per_repo)
         return f"{repo_hash:04}", purl_hashid
 
-    def get_datafile_repo_and_path(self, purl: Union[str, PackageURL]) -> Tuple[str, str]:
+    def get_datafile_repo_and_path(
+        self,
+        purl: Union[str, PackageURL],
+        datafile_name: str = None,
+    ) -> Tuple[str, str]:
         """
         Return the repository name and relative path to the datafile of the data kind stored
         in this cluster given a PURL.
         """
         purl = as_purl(purl)
         repo_hash, dir_hash = self.get_repo_and_dir_hash(purl)
-        relative_datafile_path = self.get_datafile_relative_path(purl)
+        relative_datafile_path = self.get_datafile_relative_path(purl, datafile_name=datafile_name)
 
         directory_name = f"{purl.type}-{dir_hash}"
         repository_name = f"{self.data_kind}-{purl.type}-{repo_hash}"
@@ -1125,7 +1147,8 @@ def cluster_preset():
         DataCluster(
             data_kind="purls",
             description="List of fully qualified PURL strings for a package, sorted by version.",
-            datafile_path_template="{/namespace}/{name}/purls.yml",
+            datafile_name="purls.yml",
+            datafile_path_template="{/namespace}/{name}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.small_size_configs(),
             data_schema_url="",
             documentation_url="https://github.com/package-url/purl-spec/",
@@ -1137,19 +1160,21 @@ def cluster_preset():
             "Each datafile path and schema is PURL type-specific "
             "and not documented here.",
             # FIXME: a POM is in XML, some metadata files may be code
-            datafile_path_template="",
+            datafile_name="api_package_metadata.json",
+            datafile_path_template="{/namespace}/{name}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
             data_license="CC-BY-4.0",
         ),
         DataCluster(
-            data_kind="api_package_version_responses",
+            data_kind="api_package_version_response",
             description="Raw API response datafiles for a package versions. "
             "Each datafile path and schema is PURL type-specific "
             "and not documented here.",
             # FIXME: a POM is in XML, some metadata files may be code
-            datafile_path_template="",
+            datafile_name="api_package_version_response.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1159,7 +1184,8 @@ def cluster_preset():
             data_kind="purldb",
             description="PurlDB normalized metadata datafiles for each package "
             "versions. Does not include fingerprints and symbols.",
-            datafile_path_template="{/namespace}/{name}/{version}/purldb.json",
+            datafile_name="purldb.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1170,7 +1196,8 @@ def cluster_preset():
             data_kind="vulnerabilities",
             description="VulnerableCode vulnerabilities for each package. "
             "Also includes a separate vulnerabilities directory/",
-            datafile_path_template="{/namespace}/{name}/vulnerabilities.json",
+            datafile_name="vulnerabilities.json",
+            datafile_path_template="{/namespace}/{name}/{datafile_name}",
             purl_type_configs=[PurlTypeConfig.default_config()],
             data_schema_url="",
             documentation_url="",
@@ -1179,7 +1206,8 @@ def cluster_preset():
         DataCluster(
             data_kind="security_advisories",
             description="VulnerableCode security advisories for each package version.",
-            datafile_path_template="{/namespace}/{name}/{version}/advisories.yml",
+            datafile_name="advisories.yml",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=[PurlTypeConfig.default_config()],
             data_schema_url="",
             documentation_url="",
@@ -1188,7 +1216,8 @@ def cluster_preset():
         DataCluster(
             data_kind="scancode_toolkit_scans",
             description="scancode toolkit scans for each package version.",
-            datafile_path_template="{/namespace}/{name}/{version}/scancode-toolkit.json",
+            datafile_name="scancode-toolkit.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1197,7 +1226,8 @@ def cluster_preset():
         DataCluster(
             data_kind="scancode_fingerprints",
             description="scancode_fingerprints for each package version.",
-            datafile_path_template="{/namespace}/{name}/{version}/scancode-fingerprints.json",
+            datafile_name="scancode-fingerprints.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1206,7 +1236,8 @@ def cluster_preset():
         DataCluster(
             data_kind="cyclonedx14_sboms",
             description="CycloneDX v1.4 sboms for each package version",
-            datafile_path_template="{/namespace}/{name}/{version}/cyclonedx-14.json",
+            datafile_name="cyclonedx-14.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1215,7 +1246,8 @@ def cluster_preset():
         DataCluster(
             data_kind="cyclonedx15_sboms",
             description="CycloneDX v1.5 sboms for each package version",
-            datafile_path_template="{/namespace}/{name}/{version}/cyclonedx-15.json",
+            datafile_name="cyclonedx-15.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1224,7 +1256,8 @@ def cluster_preset():
         DataCluster(
             data_kind="cyclonedx16_sboms",
             description="CycloneDX v1.6 sboms for each package version",
-            datafile_path_template="{/namespace}/{name}/{version}/cyclonedx-16.json",
+            datafile_name="cyclonedx-16.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1233,7 +1266,8 @@ def cluster_preset():
         DataCluster(
             data_kind="spdx2_sboms",
             description="SPDX version 2.x sboms for each package version",
-            datafile_path_template="{/namespace}/{name}/{version}/spdx-2.json",
+            datafile_name="spdx-2.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1242,7 +1276,8 @@ def cluster_preset():
         DataCluster(
             data_kind="atom_slices",
             description="Atom slices for each package version",
-            datafile_path_template="{/namespace}/{name}/{version}/atom.json",
+            datafile_name="atom.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1252,7 +1287,8 @@ def cluster_preset():
             data_kind="atom_vulnerable_slices",
             description="Atom vulnerable_slices for each vulnerable package version",
             # FIXME: need to qualify these with an advisory / CVE?
-            datafile_path_template="{/namespace}/{name}/{version}/atom-vulnerable.json",
+            datafile_name="atom-vulnerable.json",
+            datafile_path_template="{/namespace}/{name}/{version}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.large_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1262,7 +1298,8 @@ def cluster_preset():
             data_kind="openssf_security_scorecards",
             description="OpenSSf security_scorecards for package",
             # FIXME: need to qualify these with an advisory / CVE?
-            datafile_path_template="{/namespace}/{name}/security_scorecard.json",
+            datafile_name="security_scorecard.json",
+            datafile_path_template="{/namespace}/{name}/{datafile_name}",
             purl_type_configs=PurlTypeConfig.medium_size_configs(),
             data_schema_url="",
             documentation_url="",
@@ -1415,6 +1452,7 @@ def build_direct_federation_config_file_url(
     remote_root_url: str,
     federation_name: str,
     config_filename: str,
+    branch: str = "main",
 ):
     """
     Return the URL to download a remote config file for a federation
@@ -1423,7 +1461,7 @@ def build_direct_federation_config_file_url(
         root_url=remote_root_url,
         repo=federation_name,
         path=config_filename,
-        branch="main",
+        branch=branch,
     )
 
 

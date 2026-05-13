@@ -283,7 +283,7 @@ def test_purl_hash(purl, purl_hash):
 def test_federation_with_all_cluster_preset():
     df = DataFederation(name="foo", data_clusters=sorted(cluster_preset().values()))
     local_root_dir = TEST_DATA / "all-presets"
-    if False:
+    if REGEN:
         df.local_root_dir = local_root_dir
         df.dump()
     df2 = DataFederation.load(name="foo", local_root_dir=local_root_dir)
