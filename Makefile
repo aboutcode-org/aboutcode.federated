@@ -1,26 +1,34 @@
-# SPDX-License-Identifier: Apache-2.0
 #
-# Copyright (c) nexB Inc. and others. All rights reserved.
-# ScanCode is a trademark of nexB Inc.
 # SPDX-License-Identifier: Apache-2.0
-# See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/aboutcode-org/skeleton for support or download.
-# See https://aboutcode.org for more information about nexB OSS projects.
-#
+# Copyright (c) nexB Inc. and contributors
+# See https://github.com/aboutcode-org/aboutcode.federated/ for support and sources
 
 # Python version can be specified with `$ PYTHON_EXE=python3.x make conf`
 PYTHON_EXE?=python3
 VENV=venv
 ACTIVATE?=. ${VENV}/bin/activate;
 
+virtualenv:
+	@echo "-> Bootstrap the virtualenv with PYTHON_EXE=${PYTHON_EXE}"
+	@${PYTHON_EXE} -m venv ${VENV}
+	@${ACTIVATE} pip install --upgrade pip
 
-conf:
+conf: virtualenv
 	@echo "-> Install dependencies"
-	./configure
+	@${ACTIVATE} pip install --editable .
 
-dev:
+dev: virtualenv
 	@echo "-> Configure and install development dependencies"
-	./configure --dev
+	@${ACTIVATE} pip install --editable .[dev]
+
+build: test
+	@echo "-> Building sdist and wheel"
+	rm -rf build/ dist/
+	${VENV}/bin/flot --pyproject pyproject.toml --sdist --wheel
+
+publish: build
+	@echo "-> Publish built sdist and wheel to PyPi"
+	${VENV}/bin/twine upload dist/*
 
 doc8:
 	@echo "-> Run doc8 validation"
@@ -38,16 +46,19 @@ check:
 	@echo "-> Run Ruff format validation"
 	@${ACTIVATE} ruff format --check
 	@$(MAKE) doc8
-	@echo "-> Run ABOUT files validation"
-	@${ACTIVATE} about check etc/
 
 clean:
 	@echo "-> Clean the Python env"
-	./configure --clean
+	rm -rf ${VENV} build/ dist/ docs/_build/ pip-selfcheck.json .tox .pytest_cache/ .coverage
+	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 
-test:
+test: check
 	@echo "-> Run the test suite"
-	${VENV}/bin/pytest -vvs
+	${ACTIVATE} ${PYTHON_EXE} -m pytest -vvs
+
+bump:
+	@echo "-> Bump the version"
+	venv/bin/bump-my-version bump patch
 
 docs:
 	rm -rf docs/_build/
@@ -57,4 +68,4 @@ docs-check:
 	@${ACTIVATE} sphinx-build -E -W -b html docs/source docs/_build/
 	@${ACTIVATE} sphinx-build -E -W -b linkcheck docs/source docs/_build/
 
-.PHONY: conf dev check valid clean test docs docs-check
+.PHONY: virtualenv conf dev build publish doc8 valid check clean test bump docs docs-check
