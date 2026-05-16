@@ -4,7 +4,7 @@ build-backend = "flot.buildapi"
 
 [project]
 name = "aboutcode.federated"
-version = "1.0.2"
+version = "1.0.3"
 description = "A library for AboutCode PURL-based federated identifiers"
 readme = "README.rst"
 license = { text = "Apache-2.0" }
