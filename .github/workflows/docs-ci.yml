@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Dependencies
-        run:  ./configure --dev
+        run:  make dev
 
       - name: Check documentation and HTML for errors and dead links
         run: make docs-check
