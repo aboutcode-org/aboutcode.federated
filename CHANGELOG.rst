@@ -1,6 +1,12 @@
 Changelog
 =============
 
+v1.0.3 (May 15, 2026)
+---------------------------
+
+- Change build backend from ``setuptools`` to ``flot``. Properly construct wheel
+  to include source files.
+
 v1.0.2 (May 14, 2026)
 ---------------------------
 
